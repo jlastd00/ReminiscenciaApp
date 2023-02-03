@@ -1,7 +1,7 @@
-import express from 'express';
+import app from './app.js';
 
-const app = express();
+import './utils/database.js';
 
-app.listen(4000, () => {
-    console.log('Server running on port', 4000);
+app.listen(app.get('port'), () => {
+    console.log('Server running on port', app.get('port'));
 });
