@@ -15,10 +15,10 @@ const pacienteSchema = new Schema({
     diagnosticos: [{ diagnostico: String, profesional: String, fechaDiagnostico: Date  }],
     valoracionesYpruebas: [{ nombrePrueba: String, fechaPrueba: Date }],
     lugarNacimiento: { type: String, required: true },
-    lugarResidencia: [{ fechaDesde: String, fechaHasta: String, localidad: String, provincia: String, pais: String }],
+    lugarResidencia: [{ fechaDesde: Date, fechaHasta: Date, localidad: String, provincia: String, pais: String }],
     nivelEstudios: { type: String, required: true },
-    estudios: { institucion: String, localidad: String, fechaInicio: String, fechaFin: String, titulacion: String },
-    actividadLaboral: [{ actividad: String, empresa: String, localidad: String, provincia: String, pais: String, fechaInicio: String, fechaFin: String }],
+    estudios: { institucion: String, localidad: String, fechaInicio: Date, fechaFin: Date, titulacion: String },
+    actividadLaboral: [{ actividad: String, empresa: String, localidad: String, provincia: String, pais: String, fechaInicio: Date, fechaFin: Date }],
     aficiones: [],
     terapias: [{ 
         ref: 'Terapia', 

@@ -18,10 +18,10 @@ export const obtenerRecursos = async (req, res) => {
 // Obtener un recurso por id
 export const obtenerRecurso = async (req, res) => {
     try {
-        const recurso = Recurso.findById(req.params.id).populate('usuario');
+        const recurso = await Recurso.findById(req.params.id).populate('usuario');
         if (!recurso) throw new Error(`El recurso con id = ${req.params.id} no existe.`);
 
-        return res.status(200).json('Recurso encontrado.', recurso);
+        return res.status(200).json(generarOkResponse('Recurso encontrado.', recurso));
 
     } catch (error) {
         printError(error);
@@ -67,13 +67,57 @@ export const guardarRecurso = async (req, res) => {
     }
 }
 
+export const guardarArchivoRecurso = async (req, res) => {
+    try {
+        console.log(req.file);
+        const recurso = await Recurso.findById(req.params.id);
+        if (!recurso) throw new Error(`El recurso con id = ${req.params.id} no existe.`);
+
+        // Si el recurso tiene aechivo, se borra antes de guardar el nuevo
+        if (recurso.url != "") {
+            if (fs.pathExists(recurso.url)) {
+                fs.remove(recurso.url);
+            }
+        }
+
+        const archivoTempPath = req.file.path;
+        const nameArchivo = randomName();
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        const targetPath = path.resolve(`server/public/upload/recursos/${nameArchivo + ext}`);
+        
+        if (ext === '.png' || ext === '.jpg' || ext === '.jpeg' ||
+            ext === '.mp3' || ext === '.mp4' || ext === '.mpeg') {
+            
+            await fs.rename(archivoTempPath, targetPath);
+
+            const recursoActualizado = await Recurso.findByIdAndUpdate(
+                recurso._id,
+                { url: targetPath }, 
+                { new: true }
+            );
+
+            if (!recursoActualizado) throw new Error('Error al guardar el recurso.');
+        }
+        else {
+            await fs.unlink(archivoTempPath);
+            throw new Error('El tipo de archivo no es un tipo válido: []');
+        }
+        
+        return res.status(202).json(generarOkResponse('Archivo del recurso guardado correctamente.', nameArchivo + ext));
+    } 
+    catch (error) {
+        printError(error);
+        return res.json(generarErrorResponse(error));
+    }
+}
+
 // Actualizar un recurso
 export const actualizarRecurso = async (req, res) => {
     try {
         const recurso = await Recurso.findById(req.params.id);
         if (!recurso) throw new Error(`El recurso con id = ${req.params.id} no existe.`);
 
-        const recursoActualizado = await Recurso.findByIdAndUpdate(req.params.id, req.body);
+        const recursoActualizado = await Recurso.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!recursoActualizado) throw new Error('Error al actualizar el recurso.');
 
         return res.status(202).json(generarOkResponse('Recurso actualizado correctamente.', recursoActualizado));

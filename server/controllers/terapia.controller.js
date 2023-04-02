@@ -64,7 +64,7 @@ export const actualizarTerapia = async (req, res) => {
         const terapia = await Terapia.findById(req.params.id);
         if (!terapia) throw new Error(`La terapia con id = ${req.params.id} no existe.`);
 
-        const terapiaActualizada = await Terapia.findByIdAndUpdate(req.params.id, req.body);
+        const terapiaActualizada = await Terapia.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!terapiaActualizada) throw new Error('Error al actualizar la terapia.');
 
         return res.status(202).json(generarOkResponse('Terapia actualizada correctamente.', terapiaActualizada));

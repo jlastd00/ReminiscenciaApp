@@ -25,8 +25,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan('dev'));
 app.use(cors());
 app.use(multer({
-    dest: path.join(__dirname, '../public/upload/temp')
-}).single('image'));
+    dest: path.join(__dirname, './public/upload/temp')
+}).single('archivo'));
 app.use(express.json());
 
 // Routes
@@ -37,6 +37,6 @@ app.use('/api/pacientes', pacienteRoutes);
 app.use('/api/terapias', terapiaRoutes);
 
 // Static files
-app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use('/public', express.static(path.join(__dirname, './public')));
 
 export default app;

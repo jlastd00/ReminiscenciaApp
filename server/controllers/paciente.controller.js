@@ -1,5 +1,8 @@
+import path from 'path';
+import fs from 'fs-extra';
+
 import Paciente from "../models/Paciente.js";
-import { generarErrorResponse, generarOkResponse, printError } from "../utils/functions.js";
+import { generarErrorResponse, generarOkResponse, printError, randomName } from "../utils/functions.js";
 
 // Obtener todos los pacientes
 export const obtenerPacientes = async (req, res) => {
@@ -33,14 +36,14 @@ export const obtenerPaciente = async (req, res) => {
 export const guardarPaciente = async (req, res) => {
     
     const {
-        foto, fechaNacimiento, nombre, apellido1, apellido2, fechaAlta, 
+        fechaNacimiento, nombre, apellido1, apellido2, fechaAlta, 
         institucionalizado, institucion, direccion, diagnosticos, valoracionesYpruebas,
         lugarNacimiento, lugarResidencia, nivelEstudios, estudios, actividadLaboral, aficiones, terapias
     } = req.body;
 
     try {
         // Validaciones
-        if (!foto || !fechaNacimiento || !nombre || !apellido1 || !fechaAlta || !institucionalizado || !lugarNacimiento || 
+        if (!fechaNacimiento || !nombre || !apellido1 || !fechaAlta || !institucionalizado || !lugarNacimiento || 
             !lugarResidencia || !nivelEstudios || !estudios || !actividadLaboral || !aficiones || !terapias) {
             
             throw new Error('Faltan campos obligatorios.');
@@ -48,7 +51,6 @@ export const guardarPaciente = async (req, res) => {
 
         // Creación del paciente
         const nuevoPaciente = new Paciente({
-            foto: foto,
             fechaNacimiento: fechaNacimiento,
             nombre: nombre,
             apellido1: apellido1,
@@ -80,6 +82,55 @@ export const guardarPaciente = async (req, res) => {
     }
 }
 
+export const guardarFotoPaciente = async (req, res) => {
+    try {
+        console.log(req.file);
+        const paciente = await Paciente.findById(req.params.id);
+        if (!paciente) throw new Error(`El paciente con id = ${req.params.id} no existe.`);
+
+        // Si el paciente tiene foto, se borra antes de guardar la nueva
+        if (paciente.foto.path != "" && paciente.foto.filename != "") {
+            if (fs.pathExists(paciente.foto.path)) {
+                fs.remove(paciente.foto.path);
+            }
+        }
+
+        const imageTempPath = req.file.path;
+        const nameImg = randomName();
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        const targetPath = path.resolve(`server/public/upload/fotosPacientes/${nameImg + ext}`);
+        let foto = {};
+        
+        if (ext === '.png' || ext === '.jpg' || ext === '.jpeg') {
+            
+            await fs.rename(imageTempPath, targetPath);
+
+            foto = {
+                path: targetPath,
+                filename: nameImg + ext
+            }
+
+            const pacienteActualizado = await Paciente.findByIdAndUpdate(
+                paciente._id,
+                { foto }, 
+                { new: true }
+            );
+
+            if (!pacienteActualizado) throw new Error('Error al guardar la foto del paciente.');
+        }
+        else {
+            await fs.unlink(imageTempPath);
+            throw new Error('El tipo de imagen no es un tipo válido: [.jpg,.jpeg,.png]');
+        }
+        
+        return res.status(202).json(generarOkResponse('Foto del paciente guardada correctamente.', foto));
+    } 
+    catch (error) {
+        printError(error);
+        return res.json(generarErrorResponse(error));
+    }
+}
+
 // Actualizar un paciente
 export const actualizarPaciente = async (req, res) => {
     try {
@@ -88,7 +139,8 @@ export const actualizarPaciente = async (req, res) => {
 
         const pacienteActualizado = await Paciente.findByIdAndUpdate(
             req.params.id,
-            req.body
+            req.body, 
+            { new: true }
         );
         if (!pacienteActualizado) throw new Error('Error al actualizar el paciente.');
 

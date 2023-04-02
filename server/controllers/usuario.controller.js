@@ -51,6 +51,8 @@ export const guardarUsuario = async (req, res) => {
 
         if (password !== repassword) throw new Error('Las contraseñas no coinciden');
 
+        const token = jwt.sign({ nombre, email }, SECRET_KEY);
+
         // Creación del usuario
         const nuevoUsuario = new Usuario({
             nombre: nombre,
@@ -62,7 +64,7 @@ export const guardarUsuario = async (req, res) => {
         });
 
         // Activacion de cuenta 
-        enviarEmailActivacion(nombre, email);
+        //enviarEmailActivacion(nombre, email);
 
         // Guardar el usuario
         const usuarioRegistrado = await nuevoUsuario.save(); 
@@ -270,7 +272,7 @@ export const actualizarUsuario = async (req, res) => {
         const usuario = await Usuario.findById(req.params.id);
         if (!usuario) throw new Error(`El usuario con id ${req.params.id} no existe.`);
 
-        const usuarioActualizado = await Usuario.findByIdAndUpdate(req.params.id, req.body);
+        const usuarioActualizado = await Usuario.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!usuarioActualizado) throw new Error('Error al actualizar el usuario.');
 
         return res.status(202).json(generarOkResponse('Usuario actualizado correctamente.', usuarioActualizado));

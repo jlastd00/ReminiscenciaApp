@@ -3,19 +3,22 @@ const router = Router();
 
 import * as pacienteController from '../controllers/paciente.controller.js';
 
-// Obtener recursos
+// Obtener pacientes
 router.get('/', pacienteController.obtenerPacientes);
 
-// Obtener recurso por id
+// Obtener paciente por id
 router.get('/:id', pacienteController.obtenerPaciente);
 
-// Guardar recurso
+// Guardar paciente
 router.post('/', pacienteController.guardarPaciente);
 
-// Actualizar recurso
+// Guardar foto del paciente
+router.post('/:id', pacienteController.guardarFotoPaciente);
+
+// Actualizar paciente
 router.put('/:id', pacienteController.actualizarPaciente);
 
-// Eliminar recurso
+// Eliminar paciente
 router.delete('/:id', pacienteController.eliminarPaciente);
 
 export default router;

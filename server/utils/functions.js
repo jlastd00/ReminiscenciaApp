@@ -20,3 +20,12 @@ export const generarOkResponse = (msj, data) => {
         data
     }
 }
+
+export const randomName = () => {
+    const possible = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let randName = "";
+    for (let i = 0; i < 8; i++) {
+        randName += possible.charAt(Math.floor(Math.random() * possible.length));
+    };
+    return randName;
+}

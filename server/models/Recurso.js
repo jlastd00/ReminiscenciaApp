@@ -9,7 +9,7 @@ const recursoSchema = new Schema({
         type: Schema.Types.ObjectId 
     },
     fechaAlta: { type: Date, default: Date.now() },
-    url: { type: String, required: true, unique: true },
+    url: { type: String, required: true },
     publico: { type: Boolean, required: true },
     formato: { type: String, required: true },
     tipo: { type: String, required: true },
